@@ -182,6 +182,14 @@ operator-(vector2 A, vector2 B)
     return(Result);
 }
 
+struct RectCords
+{ //rename these latter maybe
+    vector3 upperLeft;
+    vector3 upperRight;
+    vector3 lowerLeft;
+    vector3 lowerRight;
+};
+
 //Todo(dustin): Do we want to change how this is setup once we start loading bitmaps
 #pragma pack(push, 1)
 struct bitmap_header
