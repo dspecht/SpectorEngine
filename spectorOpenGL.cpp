@@ -78,28 +78,32 @@ ResizeWindow(int width, int height)
     glLoadIdentity();
 }
 
+void renderRect(vector3 vertA, vector3 vertB, vector3 vertC, vector3 vertD, vector3 color)
+{ // Where vertB and vertC are the Diagonal
+    vector3 Vertices[6] = { vertA, vertB, vertC, vertB, vertC, vertD };
+    GLuint VBO = 0;
+
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_DYNAMIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glColor3f(color.r, color.g, color.b);
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glDisableVertexAttribArray(0);
+}
+
 void
 DEBUG_RenderFrame()
 {
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
     glLoadIdentity();
-    GLuint VBO = 0;
 
-    vector3 Vertices[6] = {
-        Vector3(1, 1, 0), Vector3(1, -1, 0), Vector3(-1, -1, -1),
-        Vector3(-1, 1, 0), Vector3(-1, -1, 0), Vector3(1, 1, -1) };
+    renderRect(Vector3(1, 1, 0), Vector3(1, -1, 0),
+            Vector3(-1, 1, 0), Vector3(-1, -1, -1), Vector3(1, 0, 0));
 
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-    glColor3f(0.0, 1.0, 0.0);
-    glDrawArrays(GL_TRIANGLES, 0, 6); // replace last arg with number of vertices to draw
-
-    glDisableVertexAttribArray(0);
 }

@@ -126,7 +126,7 @@ WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowC
     HWND Window = CreateWindowEx(0, WindowClass.lpszClassName, "Spector Engine Preview",
             WS_OVERLAPPEDWINDOW|WS_VISIBLE,
             CW_USEDEFAULT,CW_USEDEFAULT,
-            1280, 720,  //Window Starting Size
+            1920, 1080,  //Window Starting Size
             0, 0, Instance, 0);
 
     if(!(Window))
