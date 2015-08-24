@@ -8,15 +8,17 @@
 #define globalVar static
 #define localPersist static
 //--------------------------------------
-typedef int8_t int8;
-typedef int16_t int16;
-typedef int32_t int32;
-typedef int64_t int64;
+typedef int8_t s8;
+typedef int16_t s16;
+typedef int32_t s32;
+typedef int64_t s64;
 //--------------------------------------
-typedef uint8_t uint8;
-typedef uint16_t uint16;
-typedef uint32_t uint32;
-typedef uint64_t uint64;
+typedef uint8_t u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef uint64_t u64;
+
+typedef float r32;
 //--------------------------------------
 //TODO: When Casey Updates the HMH Assertion macro update this
 #if SPECTOR_ENGINE_DEBUG_MODE
@@ -36,10 +38,10 @@ struct Game_Memory
 {
    bool IsInitialized;
 
-   uint64 permanentStorageSize;
+   u64 permanentStorageSize;
    void *permanentStorage;
 
-   uint64 transientStorageSize;
+   u64 transientStorageSize;
    void *transientStorage;
 };
 
@@ -47,13 +49,13 @@ struct vector2
 {
     struct
     {
-        float x, y;
+        r32 x, y;
     };
-    float E[2];
+    r32 E[2];
 };
 
 inline vector2
-Vector2(float X, float Y)
+Vector2(r32 X, r32 Y)
 {
     vector2 result;
 
@@ -67,17 +69,17 @@ union vector3
 {
     struct
     {
-        float x, y, z;
+        r32 x, y, z;
     };
     struct
     {
-        float r, g, b;
+        r32 r, g, b;
     };
-    float E[3];
+    r32 E[3];
 };
 
 inline vector3
-Vector3(float X, float Y, float Z)
+Vector3(r32 X, r32 Y, r32 Z)
 {
     vector3 result;
 
@@ -92,17 +94,17 @@ union vector4
 {
     struct
     {
-        float x, y, z, w;
+        r32 x, y, z, w;
     };
     struct
     {
-        float r, g, b, a;
+        r32 r, g, b, a;
     };
-    float E[4];
+    r32 E[4];
 };
 
 inline vector4
-Vector4(float X, float Y, float Z, float W)
+Vector4(r32 X, r32 Y, r32 Z, r32 W)
 {
     vector4 result;
 
@@ -115,7 +117,7 @@ Vector4(float X, float Y, float Z, float W)
 }
 
 inline vector2
-operator*(float A, vector2 B)
+operator*(r32 A, vector2 B)
 {
     vector2 Result;
 
@@ -126,7 +128,7 @@ operator*(float A, vector2 B)
 }
 
 inline vector2
-operator*(vector2 B, float A)
+operator*(vector2 B, r32 A)
 {
     vector2 Result = A*B;
 
@@ -134,7 +136,7 @@ operator*(vector2 B, float A)
 }
 
 inline vector2 &
-operator*=(vector2 &B, float A)
+operator*=(vector2 &B, r32 A)
 {
     B = A * B;
 
@@ -194,26 +196,26 @@ struct RectCords
 #pragma pack(push, 1)
 struct bitmap_header
 {
-    uint16 FileType;
-    uint32 FileSize;
-    uint16 Reserved1;
-    uint16 Reserved2;
-    uint32 BitmapOffset;
-    uint32 Size;
-    int32 Width;
-    int32 Height;
-    uint16 Planes;
-    uint16 BitsPerPixel;
-    uint32 Compression;
-    uint32 SizeOfBitmap;
-    int32 HorzResolution;
-    int32 VertResolution;
-    uint32 ColorsUsed;
-    uint32 ColorsImportant;
+    u16 FileType;
+    u32 FileSize;
+    u16 Reserved1;
+    u16 Reserved2;
+    u32 BitmapOffset;
+    u32 Size;
+    s32 Width;
+    s32 Height;
+    u16 Planes;
+    u16 BitsPerPixel;
+    u32 Compression;
+    u32 SizeOfBitmap;
+    s32 HorzResolution;
+    s32 VertResolution;
+    u32 ColorsUsed;
+    u32 ColorsImportant;
 
-    uint32 RedMask;
-    uint32 GreenMask;
-    uint32 BlueMask;
+    u32 RedMask;
+    u32 GreenMask;
+    u32 BlueMask;
 };
 #pragma pack(pop)
 

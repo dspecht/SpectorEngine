@@ -11,7 +11,8 @@
 globalVar GLdouble pi = 3.1415926535897932384626433832795;
 globalVar GLuint GLBitmapFontBasePtr = NULL;
 
-void gluPerspective(GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar)
+void
+gluPerspective(GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar)
 {// function came from "http://nehe.gamedev.net/article/replacement_for_gluperspective/21002/"
     GLdouble fW, fH;
     fH = tan(fovY / 360 * pi) *zNear;
@@ -20,13 +21,14 @@ void gluPerspective(GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFa
     glFrustum((-fW), fW, (-fH), fH, zNear, zFar); // the original just calls this anyway
 }
 
-void CreateShaders()
+void
+CreateShaders()
 {// TODO(dustin): Look at adding 3 filePaths for the 3 different shaders and have them compile from that file
     char *vertexShaderSource =
-        "#version 450 core\n void main() { gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;}";
+        "#version 450 core\n void main() {gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;}";
 
     char *fragmentShaderSource =
-       "#version 450 core\n void main() { gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);}";
+       "#version 450 core\n void main() {}";
 
     GLuint shaderProgramID = glCreateProgram();
     GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
@@ -46,7 +48,8 @@ void CreateShaders()
     glUseProgram(shaderProgramID);
 }
 
-void InitOpenGL()
+void
+InitOpenGL()
 {
     glClearColor(0.0f,0.0f,0.0f,0.0f);
     glClearDepth(1.0f);
@@ -62,7 +65,8 @@ void InitOpenGL()
     CreateShaders();
 }
 
-void ResizeWindow(int width, int height)
+void
+ResizeWindow(int width, int height)
 {
     if(!height) {height = 1;}
 
@@ -74,14 +78,17 @@ void ResizeWindow(int width, int height)
     glLoadIdentity();
 }
 
-void DEBUG_RenderFrame()
+void
+DEBUG_RenderFrame()
 {
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
     glLoadIdentity();
     GLuint VBO = 0;
 
-    vector3 Vertices[6] = {Vector3(-0.9f, 0.9f, 0.0f), Vector3(-0.9f, 0.9f, 0.0f), Vector3(-0.9f, -0.9f, 0.0f), Vector3(0.9f, -0.9f, -1.0f)};
+    vector3 Vertices[6] = {
+        Vector3(1, 1, 0), Vector3(1, -1, 0), Vector3(-1, -1, -1),
+        Vector3(-1, 1, 0), Vector3(-1, -1, 0), Vector3(1, 1, -1) };
 
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -91,8 +98,8 @@ void DEBUG_RenderFrame()
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-    glColor3f(0.0f, 1.0f, 0.0f);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glColor3f(0.0, 1.0, 0.0);
+    glDrawArrays(GL_TRIANGLES, 0, 6); // replace last arg with number of vertices to draw
 
     glDisableVertexAttribArray(0);
 }

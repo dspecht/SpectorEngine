@@ -116,7 +116,7 @@ WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowC
     WindowClass.style = CS_HREDRAW|CS_VREDRAW|CS_OWNDC;
     WindowClass.lpfnWndProc = Win32MainWindowCallback;
     WindowClass.hInstance = Instance;
-    WindowClass.lpszClassName = "SpectorEnginePreviewWindow";
+    WindowClass.lpszClassName = "Spector_Engine Preview Window";
 
     if(!RegisterClass(&WindowClass))
     {
@@ -143,11 +143,11 @@ WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowC
         GameMemory.permanentStorageSize = Megabytes(256);
         GameMemory.transientStorageSize = Gigabytes(1);
 
-        uint64 totalMemoryBlockSize = GameMemory.permanentStorageSize + GameMemory.transientStorageSize;
+        u64 totalMemoryBlockSize = GameMemory.permanentStorageSize + GameMemory.transientStorageSize;
 
         GameMemory.permanentStorage = VirtualAlloc(baseMemoryAddress, (size_t)totalMemoryBlockSize,
                                                     MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
-        GameMemory.transientStorage = ((uint8 *)GameMemory.permanentStorage + GameMemory.permanentStorageSize);
+        GameMemory.transientStorage = ((u8 *)GameMemory.permanentStorage + GameMemory.permanentStorageSize);
     }
 
     while(g_Running)
