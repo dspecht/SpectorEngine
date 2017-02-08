@@ -4,6 +4,8 @@
 unsigned int screenWidth = 1600;
 unsigned int screenHeight = 900;
 
+#include "MiddleMan/glad/include/glad/glad.h"
+#include "MiddleMan/glad/include/glad/glad.c"
 #include "spectorengine.cpp" // this has most engine includes
 #include "pong.cpp"
 
@@ -76,15 +78,8 @@ Win32MainWindowCallback(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
                 Win32CleanShutdown(window);
             }
 
-            //TODO(dustin): Check to make sure GLEW is actually working
-            glewExperimental=GL_TRUE; // test for glewInit Failing
-            GLenum err = glewInit();
-            if(GLEW_OK != err) // Assuming this does not fail OPENGL should be good to go
-            {
-                char *errString = (char*)glewGetErrorString(err);
-                MessageBox(0, errString, "OPENGL GLEW ERROR", MB_ICONERROR|MB_OK);
-                Win32CleanShutdown(window);
-             }
+            Assert(!gladLoadGL())
+            //if(!gladLoadGL()) // returns 0 on error (????)
 
             UpdateWindow(window);
             InitOpenGL(); // just basic settings true init is glewinit()

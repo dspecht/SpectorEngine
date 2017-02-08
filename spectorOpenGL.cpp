@@ -2,14 +2,8 @@
 #define GL3_PROTOTYPES 1
 #define GLEW_STATIC
 
-#include "MiddleMan/glew/glew.h"
-#include "MiddleMan/glew/wglew.h"
-#include <GL/gl.h>
-#include "MiddleMan/glew/glext.h"
-#include <Wingdi.h>
-
-//#define toClipspace(clipSpaceX, clipSpaceY) = \
-//    (screenSpaceX * (2.0f/ screenWidth) - 1.0f, ScreenSpaceY * (-2.0f / screenHeight) + 1.0f)
+#define toClipspace(clipSpaceX, clipSpaceY) = \
+    (screenSpaceX * (2.0f/ screenWidth) - 1.0f, ScreenSpaceY * (-2.0f / screenHeight) + 1.0f)
 
 globalVar GLdouble pi = 3.1415926535897932384626433832795;
 globalVar GLuint GLBitmapFontBasePtr = NULL;
@@ -186,10 +180,10 @@ DEBUG_RenderFrame()
 
     glLoadIdentity();
 
-    //vector3 topLeft =       toClipSpace(0, screenHeight);
-    //vector3 topRight =      toClipSpace(screenWidth, screenHeight);
-    //vector3 bottomLeft =    toClipSpace(0,0);
-    //vector3 bottomRight =   toClipSpace(screenWidth, 0);
+    vector3 topLeft =       toClipSpace(0, screenHeight);
+    vector3 topRight =      toClipSpace(screenWidth, screenHeight);
+    vector3 bottomLeft =    toClipSpace(0,0);
+    vector3 bottomRight =   toClipSpace(screenWidth, 0);
 
     //RenderRect(bottomLeft,topLeft,topRight,bottomRight,  Vector3(0,0,0));
     //RenderRectViaPixels(Vector2(((screenWidth / 2.0f) - 0.5f),0.0f),

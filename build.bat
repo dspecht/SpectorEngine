@@ -12,7 +12,7 @@ set outputDirectories=/Fd.%buildDIR% /Fe.%buildDir% /Fo.%buildDIR%
 set WarningFlags= -WX -W4 -wd4201 -wd4100 -wd4189 -wd4505
 set Flags= -Zi -EHsc -nologo -fp:fast -Gm- -GR- -EHa- -Od %WarningFlags% %outputDirectories%
 
-set LibsLinkedTo= user32.lib Gdi32.lib OpenGL32.lib .\MiddleMan\glew\glew32s.lib
+set LibsLinkedTo= user32.lib Gdi32.lib OpenGL32.lib
 set LinkerFlags= -incremental:no -opt:ref -NODEFAULTLIB:library %LibsLinkedTo%
 
 IF NOT EXIST build mkdir build

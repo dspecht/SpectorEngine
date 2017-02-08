@@ -126,7 +126,7 @@ splitString(String input, char delim)
         {
             String result = {(char*)calloc((length +1), sizeof(char)) \
                             , (length)};
-            for(unsigned int i = 0; i < length; i++)
+            for(unsigned int j = 0; j < length; j++)
             {
                 result[i] = input[i];
             }
@@ -156,9 +156,9 @@ splitString(String input, char delim, String output)
         if(input[i] == delim)
         {
             output.length = length;
-            for(unsigned int i = 0; i < length; i++)
+            for(unsigned int j = 0; j < length; j++)
             {
-                output[i] = input[i];
+                output[i] = input[j];
             }
             output[length] = '\0';
         }
