@@ -25,12 +25,12 @@ typedef uint64_t u64;
 typedef float r32;
 //--------------------------------------
 //TODO: When Casey Updates the HMH Assertion macro update this
-#if 1 // SPECTOR_ENGINE_DEBUG_MODE
+//SPECTOR_ENGINE_DEBUG_MODE
+#if 1
     #define Assert(Expression) if(!(Expression)) {*(u8 *)0 = 0;}
 #else
     #define Assert(Expression)
 #endif
-
 #define Kilobytes(Value) ((Value)*1024LL)
 #define Megabytes(Value) (Kilobytes(Value)*1024)
 #define Gigabytes(Value) (Megabytes(Value)*1024)
@@ -48,159 +48,6 @@ struct Game_Memory
    u64 transientStorageSize;
    void *transientStorage;
 };
-
-//struct vector2
-//{
-//    struct
-//    {
-//        r32 x, y;
-//    };
-//    r32 E[2];
-//};
-//
-//inline vector2
-//Vector2(r32 X, r32 Y)
-//{
-//    vector2 result;
-//
-//    result.x = X;
-//    result.y = Y;
-//
-//    return result;
-//}
-//
-//union vector3
-//{
-//    struct
-//    {
-//        r32 x, y, z;
-//    };
-//    struct
-//    {
-//        r32 r, g, b;
-//    };
-//    r32 E[3];
-//};
-//
-//inline vector3
-//Vector3(r32 X, r32 Y, r32 Z)
-//{
-//    vector3 result;
-//
-//    result.x = X;
-//    result.y = Y;
-//    result.z = Z;
-//
-//    return result;
-//}
-//
-//union vector4
-//{
-//    struct
-//    {
-//        r32 x, y, z, w;
-//    };
-//    struct
-//    {
-//        r32 r, g, b, a;
-//    };
-//    r32 E[4];
-//};
-//
-//inline vector4
-//Vector4(r32 X, r32 Y, r32 Z, r32 W)
-//{
-//    vector4 result;
-//
-//    result.x = X;
-//    result.y = Y;
-//    result.z = Z;
-//    result.w = W;
-//
-//    return result;
-//}
-//
-//inline vector2
-//operator*(r32 A, vector2 B)
-//{
-//    vector2 Result;
-//
-//    Result.x = A*B.x;
-//    Result.y = A*B.y;
-//
-//    return(Result);
-//}
-//
-//inline vector2
-//operator*(vector2 B, r32 A)
-//{
-//    vector2 Result = A*B;
-//
-//    return(Result);
-//}
-//
-//inline vector2 &
-//operator*=(vector2 &B, r32 A)
-//{
-//    B = A * B;
-//
-//    return(B);
-//}
-//
-//inline vector2
-//operator-(vector2 A)
-//{
-//    vector2 Result;
-//
-//    Result.x = -A.x;
-//    Result.y = -A.y;
-//
-//    return(Result);
-//}
-//
-//inline vector2
-//operator+(vector2 A, vector2 B)
-//{
-//    vector2 Result;
-//
-//    Result.x = A.x + B.x;
-//    Result.y = A.y + B.y;
-//
-//    return(Result);
-//}
-//
-//inline vector2 &
-//operator+=(vector2 &A, vector2 B)
-//{
-//    A = A + B;
-//
-//    return(A);
-//}
-//
-//inline vector2
-//operator-(vector2 A, vector2 B)
-//{
-//    vector2 Result;
-//
-//    Result.x = A.x - B.x;
-//    Result.y = A.y - B.y;
-//
-//    return(Result);
-//}
-//
-//inline bool
-//operator!(vector2 A)
-//{
-//    if(A.x == NULL || A.y == NULL) {return true;}
-//    else {return false;}
-//}
-//
-//inline bool
-//operator==(vector2 A, vector2 B)
-//{
-//    if (A.x == B.x && A.y == B.y) return true;
-//    else return false;
-//}
 
 struct RectCords
 { //rename these latter maybe

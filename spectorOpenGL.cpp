@@ -185,7 +185,7 @@ DEBUG_RenderFrame()
     vector3 bottomLeft =    toClipSpace(0,0);
     vector3 bottomRight =   toClipSpace(screenWidth, 0);
 
-    //RenderRect(bottomLeft,topLeft,topRight,bottomRight,  Vector3(0,0,0));
+    RenderRect(bottomLeft,topLeft,topRight,bottomRight,  Vector3(0,255,0));
     //RenderRectViaPixels(Vector2(((screenWidth / 2.0f) - 0.5f),0.0f),
     //                    Vector2(((screenWidth / 2.0f) + 0.5f),(r32)screenHeight),
     //                    Vector3(1.0f,1.0f,1.0f));

@@ -4,7 +4,7 @@
 unsigned int screenWidth = 1600;
 unsigned int screenHeight = 900;
 
-#include "MiddleMan/glad/include/glad/glad.h"
+//#include "MiddleMan/glad/include/glad/glad.h"
 #include "MiddleMan/glad/include/glad/glad.c"
 #include "spectorengine.cpp" // this has most engine includes
 #include "pong.cpp"
@@ -78,11 +78,14 @@ Win32MainWindowCallback(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
                 Win32CleanShutdown(window);
             }
 
-            Assert(!gladLoadGL())
+            if(!gladLoadGL())
+            {
+                MessageBox(0, "Glad Faied to Load Extensions", "GLAD extension loader ERROR", MB_ICONERROR|MB_OK);
+            }
             //if(!gladLoadGL()) // returns 0 on error (????)
 
             UpdateWindow(window);
-            InitOpenGL(); // just basic settings true init is glewinit()
+            InitOpenGL(); // just basic settings true init is gladLoadGL()
             SwapBuffers(g_WindowDC);
         } break;
         //case WM_PAINT:
