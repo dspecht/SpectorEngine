@@ -127,34 +127,6 @@ void Win32ProcessPendingMessages(HWND window)
     }
 }
 
-void printVulkanDeviceProperties(VkPhysicalDeviceProperties *p)
-{
-    printf("\n Vulkan API version: %d\nDriver Version: %d\nVender ID: %d\nDevice ID: %d\n Device Name: %s\n Device Type: %d",
-            p->apiVersion, p->driverVersion, p->vendorID, p->deviceID, p->deviceName, p->deviceType);
-
-    /*
-     typedef struct VkPhysicalDeviceProperties {
-         uint32_t                            apiVersion;
-         uint32_t                            driverVersion;
-         uint32_t                            vendorID;
-         uint32_t                            deviceID;
-         VkPhysicalDeviceType                deviceType;
-         char                                deviceName[VK_MAX_PHYSICAL_DEVICE_NAME_SIZE];
-         uint8_t                             pipelineCacheUUID[VK_UUID_SIZE];
-         VkPhysicalDeviceLimits              limits;
-         VkPhysicalDeviceSparseProperties    sparseProperties;
-     } VkPhysicalDeviceProperties;
-
-     typedef enum VkPhysicalDeviceType {
-         VK_PHYSICAL_DEVICE_TYPE_OTHER = 0,
-         VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU = 1,
-         VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU = 2,
-         VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU = 3,
-         VK_PHYSICAL_DEVICE_TYPE_CPU = 4,
-     } VkPhysicalDeviceType;
-    */
-}
-
 int CALLBACK
 WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowCode)
 {
@@ -209,6 +181,7 @@ WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowC
             MessageBox(0, "Failed to find validation of layers", "VULKAN", MB_ICONERROR|MB_OK);
         }
         const char *vkApiLayers[] = {"VK_LAYER_LUNARG_standard_validation"}; //TODO make this a das string
+        //String vkApiLayers = {"VK_LAYER_LUNARG_standard_validation", 35};
 
         vkInstance_info.enabledLayerCount = 1;
         vkInstance_info.ppEnabledLayerNames = vkApiLayers;
@@ -218,26 +191,6 @@ WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowC
         if (!vkResult == VK_SUCCESS) {
             MessageBox(0, "Vulkan failed to create a instance", "VULKAN", MB_ICONERROR|MB_OK);
         }
-
-//        // VK Extensions
-//        u32 vkExtensionCount = 0;
-//        vkEnumerateInstanceExtensionProperties(NULL, &vkExtensionCount, NULL);
-//        VkExtensionProperties *extensionsAvailable = new VkExtensionProperties[vkExtensionCount];
-//        vkEnumerateInstanceExtensionProperties(NULL, &vkExtensionCount, extensionsAvailable);
-//        //String extensions[] = {"VK_KHR_surface", "VK_KHR_win32_surface"};// ,"VK_EXT_debug_report"};;
-//        char *extensions[] = {"VK_KHR_surface", "VK_KHR_win32_surface"};
-//        u32 vkNumberRequiredExtensions = sizeof(extensions) / sizeof(char*);
-//        u32 vkFoundExtensions = 0;
-//        for(u32 i = 1; i < vkExtensionCount; i++) {// PREINCREMENT !!!
-//            for(u32 j = 1; j < vkNumberRequiredExtensions; j++) {// PREINCREMENT !!!
-//                if(strcmp(extensionsAvailable[i].extensionName, extensions[j]) == 0)
-//                { vkFoundExtensions++; }
-//            }
-//        }
-//
-//        if (vkFoundExtensions != vkNumberRequiredExtensions) {
-//            MessageBox(0, "Vulkan failed to Enumerate Physical Device(s) Count", "VULKAN", MB_ICONERROR|MB_OK);
-//        }
 
         // GET PHYSICAL GPU ENMERATION DETAILS
         u32 vkGpuCount = 0;
@@ -261,20 +214,26 @@ WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowC
         // Find a Working Physical Device
         VkPhysicalDeviceProperties vkPDProperties = {};
         VkPhysicalDeviceFeatures vkPDFeatures = {};
-        VkPhysicalDevice graphics = NULL; // Final Phyiscal Device to be used
+        VkPhysicalDevice physicalDevice = NULL; // Final Phyiscal Device to be used
 
         for (u8 i = 0; i < vkGpuCount; i++) {
             vkGetPhysicalDeviceProperties(vkPdevices[i], &vkPDProperties);
             vkGetPhysicalDeviceFeatures(vkPdevices[i], &vkPDFeatures);
-            //printVulkanDeviceProperties(&vkPDProperties); // debug print
 
             if(vkPDProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && vkPDFeatures.geometryShader) {
-                graphics = vkPdevices[i];
+                physicalDevice = vkPdevices[i];
             }
         }
 
         u32 vkQueueFamilyCount = 0;
-        vkGetPhysicalDeviceQueueFamilyProperties(graphics, &vkQueueFamilyCount, nullptr);
+        vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &vkQueueFamilyCount, nullptr);
+
+        VkDeviceQueueCreateInfo queueInfo = {};
+        queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queueInfo.queueCount = 1;
+
+        float queuePriority = 1.0f; //NOTE: why does this need to be here ( Because it wants a address)
+        queueInfo.pQueuePriorities = &queuePriority;
 
         if(vkQueueFamilyCount != 0)
         {
@@ -282,36 +241,29 @@ WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowC
 
             for(u32 i = 0; i < vkQueueFamilyCount; i++)
             {
-                vkGetPhysicalDeviceQueueFamilyProperties(graphics, &i, vkQueueFamilies);
-                if(vkQueueFamilies[i]->queueCount > 0 && vkQueueFamilies.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+                vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &i, vkQueueFamilies);
+                if(vkQueueFamilies[i].queueCount > 0 && vkQueueFamilies->queueFlags & VK_QUEUE_GRAPHICS_BIT)
+                {
+                    queueInfo.queueFamilyIndex = i;
+                }
             }
         }
-//        VkDeviceQueueCreateInfo queue_info = {};
-//
-//        // FINISH setting the properties now that we have more information
-//        // UNSURE why this is needing the more information but let's roll with it for now
-//        float queue_priorities[1] = {0.0};
-//        queue_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-//        queue_info.pNext = NULL;
-//        queue_info.queueCount = 1;
-//        queue_info.pQueuePriorities = queue_priorities;
-//
-//        VkDeviceCreateInfo device_info = {};
-//        device_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-//        device_info.pNext = NULL;
-//        device_info.queueCreateInfoCount = 1;
-//        device_info.pQueueCreateInfos = &queue_info;
-//        device_info.enabledExtensionCount = 0;
-//        device_info.ppEnabledExtensionNames = NULL;
-//        device_info.enabledLayerCount = 0;
-//        device_info.ppEnabledLayerNames = NULL;
-//        device_info.pEnabledFeatures = NULL;
-//
-//        VkResult res = vkCreateDevice(vkPdevices[3], &device_info, NULL, &device_handle);
-//
-//        if (!vkResult == VK_SUCCESS) {
-//            MessageBox(0, "Vulkan failed to create Device (Type: VkDevice) I wonder why", "VULKAN", MB_ICONERROR|MB_OK);
-//        }
+
+    VkPhysicalDeviceFeatures deviceFeatures = {};
+
+    VkDeviceCreateInfo createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    createInfo.pQueueCreateInfos = &queueInfo;
+    createInfo.queueCreateInfoCount = 1;
+    createInfo.pEnabledFeatures = &deviceFeatures;
+    createInfo.enabledExtensionCount = 0;
+
+    vkResult = vkCreateDevice(physicalDevice, &createInfo, nullptr, &device_handle);
+    if (vkResult != VK_SUCCESS) {
+        MessageBox(0, "Vulkan failed to create Logical Device", "VULKAN", MB_ICONERROR|MB_OK);
+    }
+
+
     }
 
 
@@ -334,4 +286,4 @@ WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowC
         //update(&state);
         SwapBuffers(g_WindowDC);
     }
-}
+}//https://i.imgur.com/BhcsFVQ.png
