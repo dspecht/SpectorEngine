@@ -4,23 +4,17 @@
 #include "win32platform.h"
 
 // are these two things needed?
-//#define VK_USE_PLATFORM_WIN32_KHR
+#define VK_USE_PLATFORM_WIN32_KHR
 //#define VK_NO_PROTOTYPES
 #include "vulkan/vulkan.h"
 #include "vulkan/vk_sdk_platform.h"
+#include "initvulkan.cpp"
 
 unsigned int screenWidth = 1600;
 unsigned int screenHeight = 900;
 
 // Global Vars
-
 globalVar HDC g_WindowDC;
-
-VkInstance vkInstance;
-VkResult vkResult;
-
-VkDevice device_handle;
-
 globalVar bool g_Running = true;
 
 struct win32_WindowDimension
@@ -44,7 +38,7 @@ win32_WindowDimension Win32GetWindowDimensions(HWND window)
 void Win32CleanShutdown(HWND window)
 {
     g_Running = false;
-    vkDestroyInstance(vkInstance, NULL);
+    vkDestroyInstance(VKInstance, NULL);
     vkDestroyDevice(device_handle, NULL);
     ReleaseDC(window, g_WindowDC);
     PostQuitMessage(0);
@@ -139,133 +133,7 @@ WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowC
     WindowClass.lpszClassName = "Spector_Engine Vulkan Preview Window";
 
     if(!RegisterClass(&WindowClass))
-    {
-        MessageBox(0, "Failed to Register WindowClass", "Window Creation Error", MB_ICONERROR|MB_OK);
-    }
-
-    {
-        // VULKAN
-        VkApplicationInfo app_info = {};
-        app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        app_info.pNext = NULL;
-        app_info.pApplicationName = NULL; // use this of the windows dc field?
-        app_info.applicationVersion = 1;
-        app_info.pEngineName = "Spector";
-        app_info.engineVersion = 1;
-        app_info.apiVersion = VK_API_VERSION_1_0;
-
-        // initialize the VkInstanceCreateInfo structure
-        VkInstanceCreateInfo vkInstance_info = {};
-        vkInstance_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-        vkInstance_info.pNext = NULL;
-        vkInstance_info.flags = 0;
-        vkInstance_info.pApplicationInfo = &app_info;
-        vkInstance_info.enabledExtensionCount = 0;
-        vkInstance_info.ppEnabledExtensionNames = NULL;
-
-        u32 vkApiLayerCount = 0;
-        vkEnumerateInstanceLayerProperties(&vkApiLayerCount, NULL);
-        if (vkApiLayerCount == 0) {
-            MessageBox(0, "Failed to find any layer for vulkan api", "VULKAN", MB_ICONERROR|MB_OK);
-        }
-        VkLayerProperties *vkApiLayersAvailable = new VkLayerProperties[vkApiLayerCount];
-        vkEnumerateInstanceLayerProperties(&vkApiLayerCount, vkApiLayersAvailable);
-        bool vkFoundApiValidationLayer = false;
-
-        for(u32 i = 0; i < vkApiLayerCount; i++) {
-            if(strcmp(vkApiLayersAvailable[i].layerName, "VK_LAYER_LUNARG_standard_validation") == 0)
-            {vkFoundApiValidationLayer = true;}
-        }
-
-        if (vkFoundApiValidationLayer == false) {
-            MessageBox(0, "Failed to find validation of layers", "VULKAN", MB_ICONERROR|MB_OK);
-        }
-        const char *vkApiLayers[] = {"VK_LAYER_LUNARG_standard_validation"}; //TODO make this a das string
-        //String vkApiLayers = {"VK_LAYER_LUNARG_standard_validation", 35};
-
-        vkInstance_info.enabledLayerCount = 1;
-        vkInstance_info.ppEnabledLayerNames = vkApiLayers;
-
-        vkResult = vkCreateInstance(&vkInstance_info, NULL, &vkInstance);
-
-        if (!vkResult == VK_SUCCESS) {
-            MessageBox(0, "Vulkan failed to create a instance", "VULKAN", MB_ICONERROR|MB_OK);
-        }
-
-        // GET PHYSICAL GPU ENMERATION DETAILS
-        u32 vkGpuCount = 0;
-        vkResult = vkEnumeratePhysicalDevices(vkInstance, &vkGpuCount, NULL);
-            if (vkResult != VK_SUCCESS) {
-                MessageBox(0, "Vulkan failed to Enumerate Physical Device(s) Count", "VULKAN", MB_ICONERROR|MB_OK);
-            }
-        VkPhysicalDevice vkPdevices[4] = {};
-        vkResult = vkEnumeratePhysicalDevices(vkInstance, &vkGpuCount, vkPdevices);
-            if (vkResult != VK_SUCCESS) {
-                MessageBox(0, "Vulkan failed to Query Phyiscal Device(s)", "VULKAN", MB_ICONERROR|MB_OK);
-            }
-        if (vkResult == VK_ERROR_INCOMPATIBLE_DRIVER) {
-            printf("cannot find a compatible Vulkan ICD\n");
-            exit(-1);
-        } else if (vkResult) {
-            printf("unknown error\n");
-            exit(-1);
-        }
-
-        // Find a Working Physical Device
-        VkPhysicalDeviceProperties vkPDProperties = {};
-        VkPhysicalDeviceFeatures vkPDFeatures = {};
-        VkPhysicalDevice physicalDevice = NULL; // Final Phyiscal Device to be used
-
-        for (u8 i = 0; i < vkGpuCount; i++) {
-            vkGetPhysicalDeviceProperties(vkPdevices[i], &vkPDProperties);
-            vkGetPhysicalDeviceFeatures(vkPdevices[i], &vkPDFeatures);
-
-            if(vkPDProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && vkPDFeatures.geometryShader) {
-                physicalDevice = vkPdevices[i];
-            }
-        }
-
-        u32 vkQueueFamilyCount = 0;
-        vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &vkQueueFamilyCount, nullptr);
-
-        VkDeviceQueueCreateInfo queueInfo = {};
-        queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queueInfo.queueCount = 1;
-
-        float queuePriority = 1.0f; //NOTE: why does this need to be here ( Because it wants a address)
-        queueInfo.pQueuePriorities = &queuePriority;
-
-        if(vkQueueFamilyCount != 0)
-        {
-            VkQueueFamilyProperties *vkQueueFamilies = (VkQueueFamilyProperties*)calloc(vkQueueFamilyCount, sizeof(VkQueueFamilyProperties));
-
-            for(u32 i = 0; i < vkQueueFamilyCount; i++)
-            {
-                vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &i, vkQueueFamilies);
-                if(vkQueueFamilies[i].queueCount > 0 && vkQueueFamilies->queueFlags & VK_QUEUE_GRAPHICS_BIT)
-                {
-                    queueInfo.queueFamilyIndex = i;
-                }
-            }
-        }
-
-    VkPhysicalDeviceFeatures deviceFeatures = {};
-
-    VkDeviceCreateInfo createInfo = {};
-    createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    createInfo.pQueueCreateInfos = &queueInfo;
-    createInfo.queueCreateInfoCount = 1;
-    createInfo.pEnabledFeatures = &deviceFeatures;
-    createInfo.enabledExtensionCount = 0;
-
-    vkResult = vkCreateDevice(physicalDevice, &createInfo, nullptr, &device_handle);
-    if (vkResult != VK_SUCCESS) {
-        MessageBox(0, "Vulkan failed to create Logical Device", "VULKAN", MB_ICONERROR|MB_OK);
-    }
-
-
-    }
-
+    {MessageBox(0, "Failed to Register WindowClass", "Window Creation Error", MB_ICONERROR|MB_OK);}
 
     HWND Window = CreateWindowEx(0, WindowClass.lpszClassName, "Spector Engine Vulkan Preview",
             WS_OVERLAPPEDWINDOW|WS_VISIBLE,
@@ -278,6 +146,8 @@ WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowC
         MessageBox(0, "Window Creation Failed", "Window Creation Error", MB_ICONERROR|MB_OK);
         Win32CleanShutdown(Window);
     }
+
+    init_vulkan(Window, Instance);
 
     while(g_Running)
     {
