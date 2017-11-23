@@ -38,6 +38,7 @@ win32_WindowDimension Win32GetWindowDimensions(HWND window)
 void Win32CleanShutdown(HWND window)
 {
     g_Running = false;
+    vkDestroySurfaceKHR(VKInstance, surface, NULL);
     vkDestroyInstance(VKInstance, NULL);
     vkDestroyDevice(device_handle, NULL);
     ReleaseDC(window, g_WindowDC);
