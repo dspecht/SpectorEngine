@@ -5,13 +5,13 @@
 
 // are these two things needed?
 #define VK_USE_PLATFORM_WIN32_KHR
-//#define VK_NO_PROTOTYPES
+#define VK_NO_PROTOTYPES
 #include "vulkan/vulkan.h"
 #include "vulkan/vk_sdk_platform.h"
-#include "initvulkan.cpp"
+//#include "initvulkan.cpp"
 
-unsigned int screenWidth = 1600;
-unsigned int screenHeight = 900;
+u32 screenWidth = 1600;
+u32 screenHeight = 900;
 
 // Global Vars
 globalVar HDC g_WindowDC;
@@ -19,12 +19,27 @@ globalVar bool g_Running = true;
 
 struct win32_WindowDimension
 {
-    int width;
-    int height;
+    u32 width;
+    u32 height;
 };
 
-win32_WindowDimension Win32GetWindowDimensions(HWND window)
-{
+void Assert(bool flag, String msg) {
+    if(!flag) {
+        OutputDebugStringA( "ASSERT: " );
+        OutputDebugStringA( msg );
+        OutputDebugStringA( "\n" );
+        int *base = 0;
+        *base = 1;
+        messagebox(0, msg.string, "Vulkan", mb_iconerror|mb_ok);
+
+    }
+}
+
+void CheckVulkanResult( VkResult &result, char *msg ) {
+    Assert( result == VK_SUCCESS, msg );
+}
+
+win32_WindowDimension Win32GetWindowDimensions(HWND window) {
     win32_WindowDimension result = {};
 
     RECT clientRect;
@@ -35,8 +50,7 @@ win32_WindowDimension Win32GetWindowDimensions(HWND window)
     return result;
 }
 
-void Win32CleanShutdown(HWND window)
-{
+void Win32CleanShutdown(HWND window) {
     g_Running = false;
     vkDestroySurfaceKHR(VKInstance, surface, NULL);
     vkDestroyInstance(VKInstance, NULL);
@@ -47,21 +61,17 @@ void Win32CleanShutdown(HWND window)
 
 //TODO: Look at logging actual reasons for failures
 LRESULT CALLBACK
-Win32MainWindowCallback(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
-{
+Win32MainWindowCallback(HWND window, UINT message, WPARAM wParam, LPARAM lParam) {
     LRESULT result = 0;
-    switch(message)
-    {
-        case WM_CREATE:
-        {
+    switch(message) {
+        case WM_CREATE: {
             PIXELFORMATDESCRIPTOR pfd = {sizeof(PIXELFORMATDESCRIPTOR), 1,
                 PFD_DRAW_TO_WINDOW|PFD_SUPPORT_OPENGL|PFD_DOUBLEBUFFER,
                 PFD_TYPE_RGBA, 32, 0,0,0,0,0,0,0,0,0,0,0,0,0,24,
                 0, 0, 0, 0, 0, 0, 0};
 
             g_WindowDC = GetDC(window);
-            if(!g_WindowDC)
-            {
+            if(!g_WindowDC) {
                 MessageBox(0, "windows failed to retrieve a device context", "windows Device Context ERROR", MB_ICONERROR|MB_OK);
                 Win32CleanShutdown(window);
             }
@@ -83,8 +93,7 @@ Win32MainWindowCallback(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
         case WM_SYSKEYDOWN:
         case WM_SYSKEYUP:
         case WM_KEYDOWN:
-        case WM_KEYUP:
-        {
+        case WM_KEYUP: {
             u32 VKCode = (u32)wParam;
             // Chech the 30th and the 31st bits to see if the key was down
             // and if it is still down
@@ -94,37 +103,31 @@ Win32MainWindowCallback(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
             //gameInputHandling(&state,VKCode, wasDown, isDown, lParam);
             result = DefWindowProc(window,message,wParam,lParam);
         } break;
-        case WM_DESTROY:
-        {
+        case WM_DESTROY: {
             Win32CleanShutdown(window);
             result = DefWindowProc(window, message, wParam, lParam);
         } break;
-        case WM_QUIT:
-        {
+        case WM_QUIT: {
             Win32CleanShutdown(window);
             result = DefWindowProc(window, message, wParam, lParam);
         } break;
-        default:
-        {
+        default: {
             result = DefWindowProc(window, message, wParam, lParam);
         } break;
     }
     return result;
 }
 
-void Win32ProcessPendingMessages(HWND window)
-{
+void Win32ProcessPendingMessages(HWND window) {
     MSG message;
-    while(PeekMessage(&message, 0, 0, 0, PM_REMOVE))
-    {
+    while(PeekMessage(&message, 0, 0, 0, PM_REMOVE)) {
         TranslateMessage(&message);
         DispatchMessage(&message);
     }
 }
 
 int CALLBACK
-WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowCode)
-{
+WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowCode) {
     printf("Hello World");
 
     WNDCLASS WindowClass = {};
@@ -142,16 +145,14 @@ WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowC
             screenWidth, screenHeight,  //Window Starting Size
             0, 0, Instance, 0);
 
-    if(!(Window))
-    {
+    if(!(Window)) {
         MessageBox(0, "Window Creation Failed", "Window Creation Error", MB_ICONERROR|MB_OK);
         Win32CleanShutdown(Window);
     }
 
-    init_vulkan(Window, Instance);
+//    init_vulkan(Window, Instance);
 
-    while(g_Running)
-    {
+    while(g_Running) {
         Win32ProcessPendingMessages(Window);
         //DEBUG_RenderFrame();
         //update(&state);

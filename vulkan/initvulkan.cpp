@@ -179,8 +179,9 @@ void CreatePhysicalDevice() {
         vkGetPhysicalDeviceFeatures(pDevices[i], &PDFeatures);
 
         if(PDProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && PDFeatures.geometryShader) {
+//            MessageBox(0, "I GOT TO  THE 1st if loop", "VULKAN", MB_ICONERROR|MB_OK);
             u32 queueFamilyCount = 0;
-            vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
+            vkGetPhysicalDeviceQueueFamilyProperties(pDevices[i], &queueFamilyCount, nullptr);
 
             VkDeviceQueueCreateInfo queueInfo = {};
             queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
@@ -195,7 +196,7 @@ void CreatePhysicalDevice() {
                 (VkQueueFamilyProperties*) calloc(queueFamilyCount, sizeof(VkQueueFamilyProperties));
 
             for (u32 j = 0; j < queueFamilyCount; j++) {
-                vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &j, queueFamilies);
+                vkGetPhysicalDeviceQueueFamilyProperties(pDevices[i], &j, queueFamilies);
 
                 VkBool32 supportsPresent;
                 vkGetPhysicalDeviceSurfaceSupportKHR(pDevices[i], j, surface, &supportsPresent);
