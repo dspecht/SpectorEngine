@@ -5,10 +5,13 @@
 
 // are these two things needed?
 #define VK_USE_PLATFORM_WIN32_KHR
-#define VK_NO_PROTOTYPES
+
+//@Note this breaks vulkan which I get but not why it is said many places that this line is needed
+//#define VK_NO_PROTOTYPES
+
 #include "vulkan/vulkan.h"
 #include "vulkan/vk_sdk_platform.h"
-//#include "initvulkan.cpp"
+#include "initvulkan.cpp"
 
 u32 screenWidth = 1600;
 u32 screenHeight = 900;
@@ -26,18 +29,17 @@ struct win32_WindowDimension
 void Assert(bool flag, String msg) {
     if(!flag) {
         OutputDebugStringA( "ASSERT: " );
-        OutputDebugStringA( msg );
+        OutputDebugStringA( msg.string );
         OutputDebugStringA( "\n" );
-        int *base = 0;
-        *base = 1;
-        messagebox(0, msg.string, "Vulkan", mb_iconerror|mb_ok);
-
+        MessageBox(0, msg.string, "Vulkan", MB_ICONERROR|MB_OK);
     }
 }
 
-void CheckVulkanResult( VkResult &result, char *msg ) {
+/* //@Cleanup is this even needed at all?
+void CheckVulkanResult( VkResult &result, String msg ) {
     Assert( result == VK_SUCCESS, msg );
 }
+*/
 
 win32_WindowDimension Win32GetWindowDimensions(HWND window) {
     win32_WindowDimension result = {};
@@ -83,20 +85,11 @@ Win32MainWindowCallback(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
             UpdateWindow(window);
             SwapBuffers(g_WindowDC);
         } break;
-        //case WM_PAINT:
-        //{
-        //    win32_WindowDimension dimensions = Win32GetWindowDimensions(window);
-        //    ResizeWindow(dimensions.width, dimensions.height);
-        //    DEBUG_RenderFrame();
-        //    DefWindowProc(window, message, wParam, lParam);
-        //} break;
         case WM_SYSKEYDOWN:
         case WM_SYSKEYUP:
         case WM_KEYDOWN:
         case WM_KEYUP: {
             u32 VKCode = (u32)wParam;
-            // Chech the 30th and the 31st bits to see if the key was down
-            // and if it is still down
             u8 wasDown = (lParam & (1 << 30)) != 0;
             u8 isDown = (lParam & (1 << 31)) == 0;
 
@@ -128,8 +121,6 @@ void Win32ProcessPendingMessages(HWND window) {
 
 int CALLBACK
 WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowCode) {
-    printf("Hello World");
-
     WNDCLASS WindowClass = {};
     WindowClass.style = CS_HREDRAW|CS_VREDRAW|CS_OWNDC;
     WindowClass.lpfnWndProc = Win32MainWindowCallback;
@@ -145,12 +136,12 @@ WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowC
             screenWidth, screenHeight,  //Window Starting Size
             0, 0, Instance, 0);
 
-    if(!(Window)) {
+    if(!Window) {
         MessageBox(0, "Window Creation Failed", "Window Creation Error", MB_ICONERROR|MB_OK);
         Win32CleanShutdown(Window);
     }
 
-//    init_vulkan(Window, Instance);
+    init_vulkan(Window, Instance);
 
     while(g_Running) {
         Win32ProcessPendingMessages(Window);
@@ -158,4 +149,4 @@ WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowC
         //update(&state);
         SwapBuffers(g_WindowDC);
     }
-}//https://i.imgur.com/BhcsFVQ.png
+}

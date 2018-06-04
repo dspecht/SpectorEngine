@@ -23,9 +23,9 @@ typedef float r32;
 //TODO: When Casey Updates the HMH Assertion macro update this
 //SPECTOR_ENGINE_DEBUG_MODE
 #if 1
-    #define Assert(Expression) if(!(Expression)) {*(u8 *)0 = 0;}
+    #define assert(Expression) if(!(Expression)) {*(u8 *)0 = 0;}
 #else
-    #define Assert(Expression)
+    #define assert(Expression)
 #endif
 #define Kilobytes(Value) ((Value)*1024LL)
 #define Megabytes(Value) (Kilobytes(Value)*1024)
