@@ -9,6 +9,8 @@ VkResult Result;
 VkDevice device_handle;
 VkQueue graphicsQueue;
 VkSurfaceKHR surface;
+VkPhysicalDevice physicalDevice = NULL; // Final Phyiscal Device to be used
+VkQueue presentQueue;
 
 void CreateInstanceInfo() {
     VkApplicationInfo app_info = {};
@@ -59,82 +61,6 @@ void CreateInstanceInfo() {
     if (!Result == VK_SUCCESS)
     { MessageBox(0, "Vulkan failed to create a instance", "VULKAN", MB_ICONERROR|MB_OK); }
 }
-/*
-void CreatePhyiscalDevice() {
-    // GET PHYSICAL GPU ENMERATION DETAILS
-    u32 gpuCount = 0;
-    Result = vkEnumeratePhysicalDevices(VKInstance, &gpuCount, NULL);
-        if (Result != VK_SUCCESS)
-        { MessageBox(0, "Vulkan failed to Enumerate Physical Device(s) Count", "VULKAN", MB_ICONERROR|MB_OK); }
-    VkPhysicalDevice pDevices[5] = {};
-    Result = vkEnumeratePhysicalDevices(VKInstance, &gpuCount, pDevices);
-        if (Result != VK_SUCCESS)
-        { MessageBox(0, "Vulkan failed to Query Phyiscal Device(s)", "VULKAN", MB_ICONERROR|MB_OK); }
-
-    if (Result == VK_ERROR_INCOMPATIBLE_DRIVER) {
-        printf("cannot find a compatible Vulkan ICD\n");
-        exit(-1);
-    } else if (Result) {
-        printf("unknown error\n");
-        exit(-1);
-    }
-
-    // Find a Working Physical Device
-    VkPhysicalDeviceProperties PDProperties = {};
-    VkPhysicalDeviceFeatures PDFeatures = {};
-    VkPhysicalDevice physicalDevice = NULL; // Final Phyiscal Device to be used
-
-    for (u8 i = 0; i < gpuCount; i++) {
-        vkGetPhysicalDeviceProperties(pDevices[i], &PDProperties);
-        vkGetPhysicalDeviceFeatures(pDevices[i], &PDFeatures);
-
-        if(PDProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && PDFeatures.geometryShader)
-        { physicalDevice = pDevices[i]; }
-    }
-
-    u32 queueFamilyCount = 0;
-    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
-
-    VkDeviceQueueCreateInfo queueInfo = {};
-    queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    queueInfo.queueCount = 1;
-
-    float queuePriority = 1.0f; //NOTE: why does this need to be here ( Because it wants a address)
-    queueInfo.pQueuePriorities = &queuePriority;
-
-    if(queueFamilyCount != 0)
-    {
-        VkQueueFamilyProperties *queueFamilies = (VkQueueFamilyProperties*)calloc(queueFamilyCount, sizeof(VkQueueFamilyProperties));
-        for(u32 i = 0; i < queueFamilyCount; i++)
-        {
-            vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &i, queueFamilies);
-
-            //VkBool32 supportsPresent;
-            //vkGetPhyiscalDeviceSurfaceSupportKHR();
-
-            if(queueFamilies[i].queueCount > 0 && queueFamilies->queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-                { queueInfo.queueFamilyIndex = i; }
-            }
-        }
-    }
-
-    VkPhysicalDeviceFeatures deviceFeatures = {};
-
-    VkDeviceCreateInfo createInfo = {};
-    createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    createInfo.pQueueCreateInfos = &queueInfo;
-    createInfo.queueCreateInfoCount = 1;
-    createInfo.pEnabledFeatures = &deviceFeatures;
-    createInfo.enabledExtensionCount = 0;
-
-    Result = vkCreateDevice(physicalDevice, &createInfo, nullptr, &device_handle);
-    if (Result != VK_SUCCESS)
-    { MessageBox(0, "Vulkan failed to create Logical Device", "VULKAN", MB_ICONERROR|MB_OK); }
-
-    //TODO: check if this goes here or somewhere else
-    vkGetDeviceQueue(device_handle, queueInfo.queueFamilyIndex, 0, &graphicsQueue);
-}
-*/
 
 //NOTE: do we really want to pass hwnd and instance here or get them some other way
 void CreateWin32WindowSurface(HWND hwnd, HINSTANCE instance) {
@@ -156,7 +82,6 @@ void CreateWin32WindowSurface(HWND hwnd, HINSTANCE instance) {
     { MessageBox(0, "Vulkan failed to create Win32 Surface", "VULKAN", MB_ICONERROR|MB_OK); }
 }
 
-//NOTE: this is just a refactoring
 void CreatePhysicalDevice() {
 
     u32 gpuCount = 0;
@@ -176,7 +101,6 @@ void CreatePhysicalDevice() {
 
     VkPhysicalDeviceProperties PDProperties = {};
     VkPhysicalDeviceFeatures PDFeatures = {};
-    VkPhysicalDevice physicalDevice = NULL; // Final Phyiscal Device to be used
 
     for (u8 i = 0; i < gpuCount; i++) {
         vkGetPhysicalDeviceProperties(pDevices[i], &PDProperties);
@@ -213,6 +137,7 @@ void CreatePhysicalDevice() {
 
                     VkPhysicalDeviceFeatures deviceFeatures = {};
 
+                    //NOTE: The Logical Device for vulkan is also made here
                     VkDeviceCreateInfo createInfo = {};
                     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
                     createInfo.pQueueCreateInfos = &queueInfo;
@@ -223,10 +148,6 @@ void CreatePhysicalDevice() {
                     Result = vkCreateDevice(physicalDevice, &createInfo, nullptr, &device_handle);
                     if (Result != VK_SUCCESS)
                     { MessageBox(0, "Vulkan failed to create Logical Device", "VULKAN", MB_ICONERROR|MB_OK); }
-
-                    //TODO: check if this goes here or somewhere else
-                    vkGetDeviceQueue(device_handle, queueInfo.queueFamilyIndex, 0, &graphicsQueue);
-                    break;
                 }
             }
         }
