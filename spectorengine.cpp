@@ -1,10 +1,5 @@
 #include "spectorengine.h"
 
-void clearBackgroundToColor(vector3 color)
-{
-    RenderRectViaPixels(Vector2(0.0f,0.0f), Vector2((r32)screenWidth,(r32)screenHeight), color);
-}
-
 r32 BoundtoScreenY(r32 y)
 {
     if(y < 0.0f) { y = 0.0f; }

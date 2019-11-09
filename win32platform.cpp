@@ -7,12 +7,13 @@ unsigned int screenHeight = 900;
 //#include "MiddleMan/glad/include/glad/glad.h"
 #include "MiddleMan/glad/include/glad/glad.c"
 #include "spectorengine.cpp" // this has most engine includes
-#include "pong.cpp"
+
+//#include "pong.cpp" //@OLD
 
 globalVar HDC g_WindowDC;
 globalVar HGLRC g_GLRC;
 globalVar bool g_Running = true;
-globalVar GameState state = {};
+//globalVar GameState state = {};
 
 struct win32_WindowDimension
 {
@@ -88,6 +89,23 @@ Win32MainWindowCallback(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
             InitOpenGL(); // just basic settings true init is gladLoadGL()
             SwapBuffers(g_WindowDC);
         } break;
+        case WM_SIZE:
+        {
+            // 4 SIZE_MAXHIDE (popup window should hide because another window is maximized)
+            // 3 S)ZE_MAXSHOW (popup window should show because a window was resized/minimized)
+
+            // 2 SIZE_MAXIMIZED (window was maximized)
+            // 1 SIZE_MINIMIZED (window was minimized)
+            // 0 SIZE_RESTORED (window was resized but not Maximized or Minimized) COMMON
+            u32 typeOfSizeChange =  (u32)wParam;
+            DWORD resizeWidth  = LOWORD(lParam);
+            DWORD resizeHieght = HIWORD(lParam);
+
+            //resize the gl perspective to be correct with the resized window
+            ResizeWindow(resizeWidth, resizeHieght);
+
+            result = DefWindowProc(window,message,wParam,lParam);
+        }
         //case WM_PAINT:
         //{
         //    win32_WindowDimension dimensions = Win32GetWindowDimensions(window);
@@ -106,7 +124,7 @@ Win32MainWindowCallback(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
             u8 wasDown = (lParam & (1 << 30)) != 0;
             u8 isDown = (lParam & (1 << 31)) == 0;
 
-            gameInputHandling(&state,VKCode, wasDown, isDown, lParam);
+            //gameInputHandling(&state,VKCode, wasDown, isDown, lParam);
             result = DefWindowProc(window,message,wParam,lParam);
         } break;
         case WM_DESTROY:
@@ -163,6 +181,7 @@ WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowC
         Win32CleanShutdown(Window);
     }
 
+    /*
     // Initilize Game Memory Blocks (Permanent|Transient)
     //{//TODO(Dustin): Look at doing Win32 State and changing this to be more like HMH memory allocation
     //    LPVOID baseMemoryAddress = 0;
@@ -177,11 +196,13 @@ WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowC
     //                                                MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
     //    GameMemory.transientStorage = ((u8 *)GameMemory.permanentStorage + GameMemory.permanentStorageSize);
     //}
+    */
+
     while(g_Running)
     {
         Win32ProcessPendingMessages(Window);
         DEBUG_RenderFrame();
-        update(&state);
+        //update(&state);
         SwapBuffers(g_WindowDC);
     }
 }

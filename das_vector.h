@@ -14,21 +14,23 @@
 //      vector# == vector# && vector#i == vector#i
 //      vector# != vector# && vector#i != vector#i
 //      ! vector# && ! vector#i
-struct vector2
+union vector2
 {
-    struct
-    { float x,y; };
+    struct{ float x,y; };
+    struct{ float u,v; };
+    struct{ float width, height; };
     float E[2];
 };
 
-struct vector3
+union vector3
 {
     struct { float x,y,z; };
     struct { float r,g,b; };
+    struct { float u,v,__; };
     float E[3];
 };
 
-struct vector4
+union vector4
 {
     struct { float x,y,z,w; };
     struct { float r,g,b,a; };
@@ -36,21 +38,22 @@ struct vector4
 };
 
 //INT
-struct vector2i
+union vector2i
 {
-    struct
-    { int x,y; };
+    struct { int x,y; };
+    struct { int u,v; };
     int E[2];
 };
 
-struct vector3i
+union vector3i
 {
     struct { int x,y,z; };
     struct { int r,g,b; };
+    struct { int u,v,__; };
     int E[3];
 };
 
-struct vector4i
+union vector4i
 {
     struct { int x,y,z,w; };
     struct { int r,g,b,a; };

@@ -159,5 +159,4 @@ update(GameState *state)
         }
     }
     DrawBall(&state->ball);
-
 }

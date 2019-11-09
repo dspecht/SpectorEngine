@@ -150,3 +150,4 @@ WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowC
         SwapBuffers(g_WindowDC);
     }
 }
+

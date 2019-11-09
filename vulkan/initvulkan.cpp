@@ -159,3 +159,10 @@ void init_vulkan(HWND hwnd, HINSTANCE instance) {
     CreateWin32WindowSurface(hwnd, instance);
     CreatePhysicalDevice();
 }
+
+//TEMP DEBUG TEST
+void screendrawtest()
+{
+
+
+}
