@@ -6,20 +6,72 @@ unsigned int screenHeight = 900;
 
 //#include "MiddleMan/glad/include/glad/glad.h"
 #include "MiddleMan/glad/include/glad/glad.c"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "MiddleMan/stb_image.h"
+
 #include "spectorengine.cpp" // this has most engine includes
 
-//#include "pong.cpp" //@OLD
+#include "pong.cpp" //@OLD
 
 globalVar HDC g_WindowDC;
 globalVar HGLRC g_GLRC;
 globalVar bool g_Running = true;
-//globalVar GameState state = {};
+globalVar GameState state = {};
 
 struct win32_WindowDimension
 {
     int width;
     int height;
 };
+
+//@NOTE This is a seperate output console for debugging use so we can do the old
+//  printf debugging. We need to look at changing most of this debugging or inspection
+//  to on screen text once that is ready.
+//  If we choose to keep this for some reason we should get rid of the io.h and
+//  fcntl.h since we probably do not need anything else from them.
+//
+//@TODO Find a better way to do this once we can actually render text to the screen
+#if 0
+
+#include <io.h>
+#include <fcntl.h>
+
+void SetStdOutToNewConsole()
+{
+    // allocate a console for this app
+    AllocConsole();
+
+    HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+    int fileDescriptor = _open_osfhandle((intptr_t)consoleHandle, _O_TEXT);
+    FILE *fp = _fdopen( fileDescriptor, "w" );
+
+    //Change STDOUT STDIN STDERR to this new console we created
+    *stdout = *fp;
+    setvbuf(stdout, NULL, _IONBF, 0);
+
+    *stderr = *fp;
+    setvbuf(stderr, NULL, _IONBF, 0);
+
+    fp = _fdopen(fileDescriptor, "r");
+    *stdin = *fp;
+    setvbuf(stdin, NULL, _IONBF, 0);
+
+    //ios::sync_with_stdio(); // Cpp io redirect cout cin cerr clong
+
+    SetConsoleTitle("Spector Engine Debug Output");
+
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    if(GetConsoleScreenBufferInfo(consoleHandle, &csbi))
+    {
+        COORD bufferSize;
+        bufferSize.X = csbi.dwSize.X;
+        bufferSize.Y = 9999;
+        SetConsoleScreenBufferSize(consoleHandle, bufferSize);
+    }
+}
+
+#endif
 
 win32_WindowDimension Win32GetWindowDimensions(HWND window)
 {
@@ -124,7 +176,7 @@ Win32MainWindowCallback(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
             u8 wasDown = (lParam & (1 << 30)) != 0;
             u8 isDown = (lParam & (1 << 31)) == 0;
 
-            //gameInputHandling(&state,VKCode, wasDown, isDown, lParam);
+            gameInputHandling(&state,VKCode, wasDown, isDown, lParam);
             result = DefWindowProc(window,message,wParam,lParam);
         } break;
         case WM_DESTROY:
@@ -181,6 +233,8 @@ WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowC
         Win32CleanShutdown(Window);
     }
 
+    //SetStdOutToNewConsole(); // THIS is a debug console that is to be created to printf
+
     /*
     // Initilize Game Memory Blocks (Permanent|Transient)
     //{//TODO(Dustin): Look at doing Win32 State and changing this to be more like HMH memory allocation
@@ -198,11 +252,16 @@ WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowC
     //}
     */
 
+    printf("TEST: HELLO SAILOR!\n");
+
     while(g_Running)
     {
         Win32ProcessPendingMessages(Window);
-        DEBUG_RenderFrame();
-        //update(&state);
+        //DEBUG_RenderFrame();
+
+        printf("TEST: HELLO SAILOR: inside running loop!\n");
+
+        update(&state);
         SwapBuffers(g_WindowDC);
     }
 }

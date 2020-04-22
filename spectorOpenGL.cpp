@@ -8,7 +8,15 @@
 globalVar GLdouble pi = 3.1415926535897932384626433832795;
 GLuint GLBitmapFontBasePtr = NULL;
 
-vector3 toClipSpace(u32 screenX, u32 screenY, r32 screenZ = 0.0f)
+vector2 toClipSpace2(r32 screenX, r32 screenY)
+{
+    vector2 result = {};
+        result.x = screenX * (2.0f / screenWidth) -1.0f;
+        result.y = screenY * (-2.0f / screenHeight) + 1.0f;
+    return result;
+}
+
+vector3 toClipSpace(r32 screenX, r32 screenY, r32 screenZ = 0.0f)
 {
     vector3 result = {};
         result.x = screenX * (2.0f / screenWidth) -1.0f;
@@ -17,10 +25,12 @@ vector3 toClipSpace(u32 screenX, u32 screenY, r32 screenZ = 0.0f)
     return result;
 }
 
-vector3 toClipSpace(vector2 screenCord, r32 screenZ = 0.0f)
-{
-    // TODO look at removing these casts if the vector structs are expanded.
-    return toClipSpace((u32)screenCord.x, (u32)screenCord.y, screenZ);
+vector3 toClipSpace(vector3 vert) {
+    vector3 result = {};
+        result.x = vert.x * (2.0f / screenWidth) -1.0f;
+        result.y = vert.y * (-2.0f / screenHeight) + 1.0f;
+        result.z = vert.z;
+    return result;
 }
 
 void gluPerspective(GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar)
@@ -82,7 +92,7 @@ void CreateShaders()
 
 void InitOpenGL()
 {
-    glClearColor(0.3f,0.3f,0.3f,1.0f);
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClearDepth(1.0f);
 
     glEnable(GL_DEPTH_TEST);
@@ -103,7 +113,7 @@ void InitOpenGL()
 }
 
 void ResizeWindow(int width, int height = 1)
-{
+{//@TODO Actually have it redraw the screen when we get farther into the rendering line
     screenWidth = width;
     screenHeight = height;
 
@@ -187,6 +197,43 @@ void RenderRect(vector2 tRight, vector2 bRight, vector2 bLeft, vector2 tLeft, ve
     RenderRect(tright3,bright3, bleft3, tleft3, color);
 }
 
+void RenderRect(vector2 tRight, vector2 bLeft, vector3 color)
+{//TODO: Create a rect based on 2 corners since that actually gives us all the information we need to get the 2 other points
+ //@Note: Old RenderRectViaPixels was Bottom Left then Top Right.
+ // But I dont want to have more functions when the user should be the one passing stuff in world space and not pixels
+    float Vertices[] = {
+        tRight.x, tRight.y, 0.0f, // top right
+        tRight.x,  bLeft.y, 0.0f, // bottom right
+         bLeft.x,  bLeft.y, 0.0f, // bottom left
+         bLeft.x, tRight.y, 0.0f  // top left
+    };
+
+    unsigned int indices[] = {0, 1, 3, \
+                              1, 2, 3};
+
+    unsigned int VAO, VBO, EBO;
+
+    glGenBuffers(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_DYNAMIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glBindVertexArray(VAO);
+
+    glColor4f(color.r, color.g, color.b, 1.0f);
+
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glDisableVertexAttribArray(0);
+}
+
 void RenderTriangle(vector3 vA, vector3 vB, vector3 vC, vector3 color)
 {
     float Vertices[] = {vA.x, vA.y, vA.z,
@@ -266,6 +313,26 @@ void testRenderCubeImmeditate()
 
 bool isRendered = false;
 
+void DEBUG_PixelRectTest()
+{
+    r32 x = 10;
+    r32 y = 100;
+
+    vector3 color;
+    color = {0.0f, 1.0f, 0.5f};
+
+    //vector2 tRight = toClipSpace2( (x/2) + (r32)(screenWidth/2),  (y/2) + (r32)(screenHeight/2));
+    //vector2 bLeft  = toClipSpace2(-(x/2) + (r32)(screenWidth/2), -(y/2) + (r32)(screenHeight/2));
+    vector2 tRight = toClipSpace2( (x/2),  (y/2) + (r32)(screenHeight/2));
+    vector2 bLeft  = toClipSpace2(-(x/2), -(y/2) + (r32)(screenHeight/2));
+    RenderRect(tRight, bLeft, color);
+
+    tRight = toClipSpace2( (x/2) + (r32)(screenWidth),  (y/2) + (r32)(screenHeight/2));
+    bLeft  = toClipSpace2(-(x/2) + (r32)(screenWidth), -(y/2) + (r32)(screenHeight/2));
+    color = {1.0f, 0.0f, 0.0f};
+    RenderRect(tRight, bLeft, color);
+}
+
 void DEBUG_RenderFrame()
 {
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // WIREFRAME MODE
@@ -283,10 +350,17 @@ void DEBUG_RenderFrame()
     vector3 bLeft  = Vector3(-0.5f, -0.5f, 0.0f);
     vector3 tLeft  = Vector3(-0.5f,  0.5f, 0.0f);
 
-    //RenderRectViaTriangles(tRight, bRight, bLeft, tLeft, Vector3(0.0f, 0.0f, 1.0f));
-    RenderRect(tRight, bRight, bLeft, tLeft, Vector3(0.0f, 1.0f, 0.0f));
+    DEBUG_PixelRectTest();
 
-   // RenderTriangle( \
-   //        Vector3(-0.5f, -0.5f, 0.0f), Vector3(0.5f, -0.5f, 0.0f), Vector3(0.0f, 0.5f, 0.0f),
-   //        Vector3(1.0f, 1.0f, 0.0f) );
+    //RenderRect(Vector2(0.5f, 0.5f), Vector2(-0.5f, -0.5f), Vector3(1.0f, 0.0f, 0.0f));
+
+
+    //RenderRectViaTriangles(tRight, bRight, bLeft, tLeft, Vector3(0.0f, 0.0f, 1.0f));
+    //RenderRect(tRight, bRight, bLeft, tLeft, Vector3(0.0f, 1.0f, 0.0f));
+
+    //RenderTriangle( \
+    //       Vector3(-0.5f, -0.5f, 0.0f), Vector3(0.5f, -0.5f, 0.0f), Vector3(0.0f, 0.5f, 0.0f), \
+    //       Vector3(1.0f, 1.0f, 0.0f) );
+
+    glPushMatrix();
 }

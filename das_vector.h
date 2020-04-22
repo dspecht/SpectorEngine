@@ -7,13 +7,16 @@
 //      vector# * vector# && vector#i * vector#i
 //      vector# *= float && vector#i *= int
 //      vector# *= vector# && vector#i *= vector#i
-//      Negitive float vector && Negitive int vector
+//      (NOT IMPLEMENTED) Negitive float vector && Negitive int vector
 //      vector# + vector# && vector#i + vector#i
 //      vector# += vector# && vector#i += vector#i
+//      vector# - vector# && vector#i - vector#i
+//      vector# -= vector# && vector#i -= vector#i
 //      vector# - vector# && vector#i - vector#i
 //      vector# == vector# && vector#i == vector#i
 //      vector# != vector# && vector#i != vector#i
 //      ! vector# && ! vector#i
+
 union vector2
 {
     struct{ float x,y; };
@@ -28,6 +31,7 @@ union vector3
     struct { float r,g,b; };
     struct { float u,v,__; };
     float E[3];
+
 };
 
 union vector4
@@ -59,6 +63,7 @@ union vector4i
     struct { int r,g,b,a; };
     int E[4];
 };
+
 // Create a float Vector
 vector2 Vector2(float x, float y)
 { vector2 result = {x,y}; return result; }
@@ -142,20 +147,22 @@ inline vector3i & operator*=(vector3i &b, vector3i a)
 inline vector4i & operator*=(vector4i &b, vector4i a)
 { return b = a * b; }
 
-//Negitive (negate) float vector
-inline vector2 operator-(vector2 a)
-{ vector2 result = {-a.x, -a.y}; return result;}
-inline vector3 operator-(vector3 a)
-{ vector3 result = {-a.x, -a.y, -a.z}; return result;}
-inline vector4 operator-(vector4 a)
-{ vector4 result = {-a.x, -a.y, -a.z, -a.w}; return result;}
-//Negitive (negate) int vector
-inline vector2i operator-(vector2i a)
-{ vector2i result = {-a.x, -a.y}; return result;}
-inline vector3i operator-(vector3i a)
-{ vector3i result = {-a.x, -a.y, -a.z}; return result;}
-inline vector4i operator-(vector4i a)
-{ vector4i result = {-a.x, -a.y, -a.z, -a.w}; return result;}
+//@TODO Look at being able to use this with the normal subtraction operator
+//      for now I believe just negating the thing can be done by hand.
+////Negitive (negate) float vector
+//inline vector2 operator-(vector2 a)
+//{ vector2 result = {-a.x, -a.y}; return result;}
+//inline vector3 operator-(vector3 a)
+//{ vector3 result = {-a.x, -a.y, -a.z}; return result;}
+//inline vector4 operator-(vector4 a)
+//{ vector4 result = {-a.x, -a.y, -a.z, -a.w}; return result;}
+////Negitive (negate) int vector
+//inline vector2i operator-(vector2i a)
+//{ vector2i result = {-a.x, -a.y}; return result;}
+//inline vector3i operator-(vector3i a)
+//{ vector3i result = {-a.x, -a.y, -a.z}; return result;}
+//inline vector4i operator-(vector4i a)
+//{ vector4i result = {-a.x, -a.y, -a.z, -a.w}; return result;}
 
 //float vector + float vector
 inline vector2 operator+(vector2 a, vector2 b)
@@ -163,7 +170,7 @@ inline vector2 operator+(vector2 a, vector2 b)
 inline vector3 operator+(vector3 a, vector3 b)
 { vector3 result = {(a.x + b.x),(a.y + b.y),(a.z + b.z)}; return result; }
 inline vector4 operator+(vector4 a, vector4 b)
-{ vector4 result = {(a.x + b.x),(a.y + b.y),(a.z + b.z),(a.w + b.z)}; return result; }
+{ vector4 result = {(a.x + b.x),(a.y + b.y),(a.z + b.z),(a.w + b.w)}; return result; }
 //int vector + int vector
 inline vector2i operator+(vector2i a, vector2i b)
 { vector2i result = {(a.x + b.x),(a.y + b.y)}; return result; }
@@ -188,13 +195,14 @@ inline vector3i & operator+=(vector3i &b, vector3i a)
 inline vector4i & operator+=(vector4i &b, vector4i a)
 { return b = a + b; }
 
+
 //float vector - float vector
 inline vector2 operator-(vector2 a, vector2 b)
 { vector2 result = {(a.x - b.x),(a.y - b.y)}; return result; }
 inline vector3 operator-(vector3 a, vector3 b)
 { vector3 result = {(a.x - b.x),(a.y - b.y),(a.z - b.z)}; return result; }
 inline vector4 operator-(vector4 a, vector4 b)
-{ vector4 result = {(a.x - b.x),(a.y - b.y),(a.z - b.z),(a.w - b.z)}; return result; }
+{ vector4 result = {(a.x + b.x),(a.y - b.y),(a.z - b.z),(a.w - b.w)}; return result; }
 //int vector - int vector
 inline vector2i operator-(vector2i a, vector2i b)
 { vector2i result = {(a.x - b.x),(a.y - b.y)}; return result; }
@@ -202,6 +210,22 @@ inline vector3i operator-(vector3i a, vector3i b)
 { vector3i result = {(a.x - b.x),(a.y - b.y),(a.z - b.z)}; return result; }
 inline vector4i operator-(vector4i a, vector4i b)
 { vector4i result = {(a.x - b.x),(a.y - b.y),(a.z - b.z),(a.w - b.w)}; return result; }
+
+//-= float vector, float vector
+inline vector2 & operator-=(vector2 &b, vector2 a)
+{ return b = a - b; }
+inline vector3 & operator-=(vector3 &b, vector3 a)
+{ return b = a - b; }
+inline vector4 & operator-=(vector4 &b, vector4 a)
+{ return b = a - b; }
+//-= int vector,int vector
+inline vector2i & operator-=(vector2i &b, vector2i a)
+{ return b = a - b; }
+inline vector3i & operator-=(vector3i &b, vector3i a)
+{ return b = a - b; }
+inline vector4i & operator-=(vector4i &b, vector4i a)
+{ return b = a - b; }
+
 
 //float vector == float vector
 inline bool operator==(vector2 a, vector2 b)
